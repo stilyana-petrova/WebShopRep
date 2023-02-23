@@ -20,5 +20,8 @@ namespace WebShopDemo.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<WebShopDemo.Models.Product.ProductCreateVM> ProductCreateVM { get; set; }
+        public DbSet<WebShopDemo.Models.Product.ProductIndexVM> ProductIndexVM { get; set; }
+        public DbSet<WebShopDemo.Models.Product.ProductEditVM> ProductEditVM { get; set; }
+        public DbSet<WebShopDemo.Models.Product.ProductDetailsVM> ProductDetailsVM { get; set; }
     }
 }

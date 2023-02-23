@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebShopDemo.Abstraction;
+using WebShopDemo.Domain;
 using WebShopDemo.Models.Brand;
 using WebShopDemo.Models.Category;
 using WebShopDemo.Models.Product;
@@ -12,6 +14,7 @@ using WebShopDemo.Services;
 
 namespace WebShopDemo.Controllers
 {
+    [Authorize(Roles ="Administrator")]
     public class ProductController : Controller
     {
         private readonly IProductService productService; 
@@ -26,6 +29,7 @@ namespace WebShopDemo.Controllers
         }
 
         // GET: ProductController
+        [AllowAnonymous]
         public ActionResult Index( string searchStringCategoryName, string searchBrandName)
         {
             List<ProductIndexVM> products = productService.GetProducts(searchStringCategoryName, searchBrandName)
@@ -47,9 +51,28 @@ namespace WebShopDemo.Controllers
         }
 
         // GET: ProductController/Details/5
+        [AllowAnonymous]
         public ActionResult Details(int id)
         {
-            return View();
+            Product item = productService.GetProductById(id);
+            if (item==null)
+            {
+                return NotFound();
+            }
+            ProductDetailsVM product = new ProductDetailsVM()
+            {
+                Id = item.Id,
+                ProductName = item.ProductName,
+                BrandId = item.BrandId,
+                BrandName = item.Brand.BrandName,
+                CategoryId = item.CategoryId,
+                CategoryName = item.Category.CategoryName,
+                Picture = item.Picture,
+                Quantity = item.Quantity,
+                Price = item.Price,
+                Discount = item.Discount
+            };
+            return View(product);
         }
 
         // GET: ProductController/Create
@@ -88,27 +111,74 @@ namespace WebShopDemo.Controllers
         // GET: ProductController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            Product product = productService.GetProductById(id);
+            if (product==null)
+            {
+                return NotFound();
+            }
+            ProductEditVM updatedProduct = new ProductEditVM()
+            {
+                Id=product.Id,
+                ProductName=product.ProductName,
+                BrandId=product.BrandId,
+                CategoryId=product.CategoryId,
+                Picture=product.Picture,
+                Quantity=product.Quantity,
+                Price=product.Price,
+                Discount=product.Discount
+            };
+            updatedProduct.Brands = brandService.GetBrands().Select(b => new BrandPairVM()
+            {
+                Id = b.Id,
+                Name = b.BrandName
+            }).ToList();
+            updatedProduct.Categories = categortService.GetCategoties().Select(c => new CategoryPairVM()
+            {
+                Id = c.Id,
+                Name = c.CategoryName
+            }).ToList();
+            return View(updatedProduct);
         }
 
         // POST: ProductController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, ProductEditVM product)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                var updated = productService.Update(id, product.ProductName,
+                    product.BrandId, product.CategoryId, product.Picture,
+                    product.Quantity, product.Price, product.Discount);
+                if (updated)
+                {
+                    return this.RedirectToAction("Index");
+                }
             }
-            catch
-            {
-                return View();
-            }
+            return View(product);
         }
 
         // GET: ProductController/Delete/5
         public ActionResult Delete(int id)
         {
+            Product item = productService.GetProductById(id);
+            if (item==null)
+            {
+                return NotFound();
+            }
+            ProductDeleteVM product = new ProductDeleteVM()
+            {
+                Id = item.Id,
+                ProductName = item.ProductName,
+                BrandId = item.BrandId,
+                BrandName = item.Brand.BrandName,
+                CategoryId = item.CategoryId,
+                CategoryName = item.Category.CategoryName,
+                Picture = item.Picture,
+                Quantity = item.Quantity,
+                Price = item.Price,
+                Discount = item.Discount
+            };
             return View();
         }
 
@@ -117,14 +187,19 @@ namespace WebShopDemo.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
-            try
+            var deleted = productService.RemoveById(id);
+            if (deleted)
             {
-                return RedirectToAction(nameof(Index));
+                return this.RedirectToAction("Success");
             }
-            catch
+            else
             {
                 return View();
             }
+        }
+        public IActionResult Success()
+        {
+            return View();
         }
     }
 }
