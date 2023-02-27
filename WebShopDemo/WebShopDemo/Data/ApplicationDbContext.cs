@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebShopDemo.Domain;
 using WebShopDemo.Models.Product;
+using WebShopDemo.Models.Order;
 
 namespace WebShopDemo.Data
 {
@@ -23,5 +24,7 @@ namespace WebShopDemo.Data
         public DbSet<WebShopDemo.Models.Product.ProductIndexVM> ProductIndexVM { get; set; }
         public DbSet<WebShopDemo.Models.Product.ProductEditVM> ProductEditVM { get; set; }
         public DbSet<WebShopDemo.Models.Product.ProductDetailsVM> ProductDetailsVM { get; set; }
+        public DbSet<WebShopDemo.Models.Order.OrderIndexVM> OrderIndexVM { get; set; }
+        public DbSet<WebShopDemo.Models.Order.OrderConfirmVM> OrderConfirmVM { get; set; }
     }
 }

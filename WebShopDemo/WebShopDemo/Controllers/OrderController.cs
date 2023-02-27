@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ using WebShopDemo.Models.Order;
 
 namespace WebShopDemo.Controllers
 {
+    [Authorize(Roles = "Administrator")]
+
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,6 +23,7 @@ namespace WebShopDemo.Controllers
             this._context = context;
         }
         // GET: OrderController
+
         public ActionResult Index()
         {
             string userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -40,6 +44,7 @@ namespace WebShopDemo.Controllers
             }).ToList();
             return View(orders);
         }
+        [AllowAnonymous]
         public IActionResult MyOrders(string searchString)
         {
             string currentUserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -77,6 +82,7 @@ namespace WebShopDemo.Controllers
         }
 
         // GET: OrderController/Create
+        [AllowAnonymous]
         public ActionResult Create(int productId, int quantity)
         {
             string userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -105,6 +111,7 @@ namespace WebShopDemo.Controllers
         // POST: OrderController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public ActionResult Create(OrderConfirmVM bindingModel)
         {
             if (ModelState.IsValid)
