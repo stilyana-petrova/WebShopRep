@@ -1,4 +1,6 @@
-﻿@model IEnumerable<WebShopDemo.Models.Product.ProductIndexVM>
+﻿@using WebShopDemo.Models.Order
+@model IEnumerable<WebShopDemo.Models.Product.ProductIndexVM>
+
 
 @{
     ViewData["Title"] = "Index";
@@ -56,7 +58,11 @@
             <th>
                 @Html.DisplayNameFor(model => model.Discount)
             </th>
-            <th></th>
+            @if (this.User.Identity.IsAuthenticated)
+            {
+                <th>Order</th>
+            }
+
         </tr>
     </thead>
     <tbody>
@@ -88,12 +94,21 @@
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Discount)
+                    @Html.DisplayFor(modelItem => item.Discount) %
                 </td>
+                @if (this.User.Identity.IsAuthenticated)
+                {
+                    <td>
+                        @await Html.PartialAsync("_OrderPartialView", new OrderConfirmVM
+                   {
+                       ProductId = item.Id
+                   })
+                    </td>
+                }
                 <td>
                     @if ((this.User.Identity.IsAuthenticated) && (this.User.IsInRole("Administrator")))
                     {
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                     }|
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                     @if ((this.User.Identity.IsAuthenticated) && (this.User.IsInRole("Administrator")))
